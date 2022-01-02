@@ -1,5 +1,6 @@
 #include <iostream>
 #include <windows.h>
+#include <vector>
 using namespace std;
 
 struct Uzytkownik
@@ -7,15 +8,17 @@ struct Uzytkownik
     int id;
     string nazwa, haslo;
 };
-int rejestracja(Uzytkownik users[], int usersCount)
+void rejestracja(vector<Uzytkownik> &uzytkownicy)
 {
+    Uzytkownik nowyUzytkownik;
+    int iloscUzytkownikow = uzytkownicy.size();
     string nazwa, haslo;
     cout<<"Podaj nazwe uzytkownika: ";
-    cin>> nazwa;
-    int i =0;
-    while(i<usersCount)
+    cin>>nazwa;
+    int i = 0;
+    while(i<iloscUzytkownikow)
     {
-        if (users[i].nazwa==nazwa)
+        if (uzytkownicy[i].nazwa==nazwa)
         {
             cout<<"Taki uzytkownik juz istnieje. Wpisz inna nazwe uzytkownika: ";
             cin>>nazwa;
@@ -28,16 +31,17 @@ int rejestracja(Uzytkownik users[], int usersCount)
     }
     cout<<"Podaj haslo: ";
     cin>>haslo;
-    users[usersCount].nazwa=nazwa;
-    users[usersCount].haslo=haslo;
-    users[usersCount].id=usersCount+1;
+    nowyUzytkownik.nazwa=nazwa;
+    nowyUzytkownik.haslo=haslo;
+    nowyUzytkownik.id=iloscUzytkownikow+1;
+    uzytkownicy.push_back(nowyUzytkownik);
     cout<<"Konto zalozone"<<endl;
     Sleep(1000);
-    return usersCount+1;
 }
 
-int logowanie(Uzytkownik uzytkownicy[], int iloscUzytkownikow)
+int logowanie(vector<Uzytkownik> &uzytkownicy)
 {
+    int iloscUzytkownikow = uzytkownicy.size();
     string nazwa, haslo;
     cout << "Podaj login: ";
     cin >> nazwa;
@@ -68,8 +72,9 @@ int logowanie(Uzytkownik uzytkownicy[], int iloscUzytkownikow)
     return 0;
 
 }
-void zmianaHasla (Uzytkownik uzytkownicy[], int iloscUzytkownikow, int idZalogowanegoUzytkownika)
+void zmianaHasla (vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika)
 {
+    int iloscUzytkownikow = uzytkownicy.size();
     string haslo;
     cout<<"Podaj nowe haslo: ";
     cin>>haslo;
@@ -82,12 +87,11 @@ void zmianaHasla (Uzytkownik uzytkownicy[], int iloscUzytkownikow, int idZalogow
             Sleep(1500);
         }
     }
-
 }
 
 int main()
 {
-    Uzytkownik uzytkownicy [100];
+    vector<Uzytkownik> uzytkownicy(0);
     int idZalogowanegoUzytkownika = 0;
     int iloscUzytkownikow = 0;
     char wybor;
@@ -102,11 +106,11 @@ int main()
             cin>>wybor;
             if(wybor=='1')
             {
-                iloscUzytkownikow = rejestracja(uzytkownicy, iloscUzytkownikow);
+                rejestracja(uzytkownicy);
             }
             else if (wybor=='2')
             {
-                idZalogowanegoUzytkownika = logowanie(uzytkownicy, iloscUzytkownikow);
+                idZalogowanegoUzytkownika = logowanie(uzytkownicy);
             }
             else if (wybor=='9')
             {
@@ -121,7 +125,7 @@ int main()
             cin>>wybor;
             if(wybor=='1')
             {
-                zmianaHasla(uzytkownicy, iloscUzytkownikow, idZalogowanegoUzytkownika);
+                zmianaHasla(uzytkownicy, idZalogowanegoUzytkownika);
             }
             else if (wybor=='2')
             {
@@ -129,6 +133,5 @@ int main()
             }
         }
     }
-
     return 0;
 }
