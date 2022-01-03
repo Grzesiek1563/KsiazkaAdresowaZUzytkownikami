@@ -43,6 +43,14 @@ void rejestracja(vector<Uzytkownik> &uzytkownicy)
 int logowanie(vector<Uzytkownik> &uzytkownicy)
 {
     int iloscUzytkownikow = uzytkownicy.size();
+    if (iloscUzytkownikow == 0)
+    {
+        cout<<"Brak zarejestrowanych uzytkownikow. "<<endl;
+        Sleep(1500);
+        return 0;
+    }
+    else
+    {
     string login, haslo;
     cout << "Podaj login: ";
     cin >> login;
@@ -71,7 +79,7 @@ int logowanie(vector<Uzytkownik> &uzytkownicy)
     cout<<"Nie ma uzytkownika z takim loginem"<<endl;
     Sleep(1000);
     return 0;
-
+    }
 }
 void zmianaHasla (vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika)
 {
