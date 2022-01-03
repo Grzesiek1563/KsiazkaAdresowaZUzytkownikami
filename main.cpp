@@ -1,6 +1,7 @@
 #include <iostream>
 #include <windows.h>
 #include <vector>
+#include <conio.h>
 using namespace std;
 
 struct Uzytkownik
@@ -93,7 +94,6 @@ int main()
 {
     vector<Uzytkownik> uzytkownicy(0);
     int idZalogowanegoUzytkownika = 0;
-    int iloscUzytkownikow = 0;
     char wybor;
     while (1)
     {
@@ -103,18 +103,32 @@ int main()
             cout<<"1. Rejestracja"<<endl;
             cout<<"2. Logowanie"<<endl;
             cout<<"9. Zakoncz program"<<endl;
-            cin>>wybor;
-            if(wybor=='1')
+            cout<<"Twoj wybor: ";
+            wybor = getch();
+            switch (wybor)
             {
+            case '1':
+            {
+                system("cls");
                 rejestracja(uzytkownicy);
             }
-            else if (wybor=='2')
+            break;
+            case '2':
             {
+                system("cls");
                 idZalogowanegoUzytkownika = logowanie(uzytkownicy);
             }
-            else if (wybor=='9')
+            break;
+            case '9':
             {
                 exit(0);
+            }
+            break;
+            default:
+            {
+            cout<<"Wybrales nieprawidlowy numer."<<endl;
+            Sleep(1500);
+            }
             }
         }
         else
@@ -122,14 +136,27 @@ int main()
             system("cls");
             cout<<"1. Zmiana hasla"<<endl;
             cout<<"2. Wylogowanie"<<endl;
-            cin>>wybor;
-            if(wybor=='1')
+            cout<<"Twoj wybor: ";
+            wybor = getch();
+            switch (wybor)
             {
+            case '1':
+            {
+                system("cls");
                 zmianaHasla(uzytkownicy, idZalogowanegoUzytkownika);
             }
-            else if (wybor=='2')
+            break;
+            case '2':
             {
+                system("cls");
                 idZalogowanegoUzytkownika = 0;
+            }
+            break;
+            default:
+            {
+            cout<<"Wybrales nieprawidlowy numer."<<endl;
+            Sleep(1500);
+            }
             }
         }
     }
