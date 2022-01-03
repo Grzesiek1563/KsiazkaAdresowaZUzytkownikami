@@ -5,23 +5,23 @@ using namespace std;
 
 struct Uzytkownik
 {
-    int id;
-    string nazwa, haslo;
+    int idUzytkownika;
+    string login, haslo;
 };
 void rejestracja(vector<Uzytkownik> &uzytkownicy)
 {
     Uzytkownik nowyUzytkownik;
     int iloscUzytkownikow = uzytkownicy.size();
-    string nazwa, haslo;
+    string login, haslo;
     cout<<"Podaj nazwe uzytkownika: ";
-    cin>>nazwa;
+    cin>>login;
     int i = 0;
     while(i<iloscUzytkownikow)
     {
-        if (uzytkownicy[i].nazwa==nazwa)
+        if (uzytkownicy[i].login==login)
         {
             cout<<"Taki uzytkownik juz istnieje. Wpisz inna nazwe uzytkownika: ";
-            cin>>nazwa;
+            cin>>login;
             i = 0;
         }
         else
@@ -31,9 +31,9 @@ void rejestracja(vector<Uzytkownik> &uzytkownicy)
     }
     cout<<"Podaj haslo: ";
     cin>>haslo;
-    nowyUzytkownik.nazwa=nazwa;
+    nowyUzytkownik.login=login;
     nowyUzytkownik.haslo=haslo;
-    nowyUzytkownik.id=iloscUzytkownikow+1;
+    nowyUzytkownik.idUzytkownika=iloscUzytkownikow+1;
     uzytkownicy.push_back(nowyUzytkownik);
     cout<<"Konto zalozone"<<endl;
     Sleep(1000);
@@ -42,13 +42,13 @@ void rejestracja(vector<Uzytkownik> &uzytkownicy)
 int logowanie(vector<Uzytkownik> &uzytkownicy)
 {
     int iloscUzytkownikow = uzytkownicy.size();
-    string nazwa, haslo;
+    string login, haslo;
     cout << "Podaj login: ";
-    cin >> nazwa;
+    cin >> login;
     int i =0;
     while(i<iloscUzytkownikow)
     {
-        if (uzytkownicy[i].nazwa==nazwa)
+        if (uzytkownicy[i].login==login)
         {
             for (int proby=0; proby <3; proby++)
             {
@@ -58,7 +58,7 @@ int logowanie(vector<Uzytkownik> &uzytkownicy)
                 {
                     cout<<"Zalogowales sie. "<<endl;
                     Sleep(1000);
-                    return uzytkownicy[i].id;
+                    return uzytkownicy[i].idUzytkownika;
                 }
             }
             cout<<"Podales 3 razy bledne haslo. Poczekaj 3 sekundy przed kolejna proba"<<endl;
@@ -80,7 +80,7 @@ void zmianaHasla (vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika
     cin>>haslo;
     for(int i=0; i<iloscUzytkownikow; i++)
     {
-        if (uzytkownicy[i].id==idZalogowanegoUzytkownika)
+        if (uzytkownicy[i].idUzytkownika==idZalogowanegoUzytkownika)
         {
             uzytkownicy[i].haslo=haslo;
             cout<<"Haslo zostalo zmienione"<<endl;
