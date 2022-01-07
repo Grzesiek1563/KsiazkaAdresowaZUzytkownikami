@@ -7,7 +7,7 @@
 using namespace std;
 struct DaneKontaktu
 {
-    int idKontaktu;
+    int idKontaktu, idZalogowanegoUzytkownika;
     string imie, nazwisko, nrTelefonu, adresZamieszkania, email;
 };
 struct Uzytkownik
@@ -56,14 +56,18 @@ void zapiszKontaktyPoUsunieciuKontaktu(vector<DaneKontaktu> &kontakty)
     int iloscKontaktow = kontakty.size();
     fstream ksiazkaAdresowa;
     ksiazkaAdresowa.open("Adresaci.txt",ios::out);
-    for(int i = 0; i < iloscKontaktow; i++)
+    if(ksiazkaAdresowa.good())
     {
-        ksiazkaAdresowa<<kontakty[i].idKontaktu<<"|";
-        ksiazkaAdresowa<<kontakty[i].imie<<"|";
-        ksiazkaAdresowa<<kontakty[i].nazwisko<<"|";
-        ksiazkaAdresowa<<kontakty[i].nrTelefonu<<"|";
-        ksiazkaAdresowa<<kontakty[i].email<<"|";
-        ksiazkaAdresowa<<kontakty[i].adresZamieszkania<<"|"<<endl;
+        for(int i = 0; i < iloscKontaktow; i++)
+        {
+            ksiazkaAdresowa<<kontakty[i].idKontaktu<<"|";
+            ksiazkaAdresowa<<kontakty[i].idZalogowanegoUzytkownika<<"|";
+            ksiazkaAdresowa<<kontakty[i].imie<<"|";
+            ksiazkaAdresowa<<kontakty[i].nazwisko<<"|";
+            ksiazkaAdresowa<<kontakty[i].nrTelefonu<<"|";
+            ksiazkaAdresowa<<kontakty[i].email<<"|";
+            ksiazkaAdresowa<<kontakty[i].adresZamieszkania<<"|"<<endl;
+        }
     }
     ksiazkaAdresowa.close();
 }
@@ -71,16 +75,20 @@ void zapiszKontakt(DaneKontaktu osobaDoDodania)
 {
     fstream ksiazkaAdresowa;
     ksiazkaAdresowa.open("Adresaci.txt",ios::out|ios::app);
+    if(ksiazkaAdresowa.good())
+    {
     ksiazkaAdresowa<<osobaDoDodania.idKontaktu<<"|";
+    ksiazkaAdresowa<<osobaDoDodania.idZalogowanegoUzytkownika<<"|";
     ksiazkaAdresowa<<osobaDoDodania.imie<<"|";
     ksiazkaAdresowa<<osobaDoDodania.nazwisko<<"|";
     ksiazkaAdresowa<<osobaDoDodania.nrTelefonu<<"|";
     ksiazkaAdresowa<<osobaDoDodania.email<<"|";
     ksiazkaAdresowa<<osobaDoDodania.adresZamieszkania<<"|"<<endl;
+    }
     ksiazkaAdresowa.close();
 }
 
-void dodajKontakt (vector<DaneKontaktu> &kontakty)
+void dodajKontakt (vector<DaneKontaktu> &kontakty, int idZalogowanegoUzytkownika)
 {
     int iloscKontaktow = kontakty.size();
     bool kontynowacDodawanieKontaktu = true;
@@ -103,6 +111,7 @@ void dodajKontakt (vector<DaneKontaktu> &kontakty)
         getline(cin, osobaDoDodania.adresZamieszkania);
         cout<<"Podaj email: ";
         cin>>osobaDoDodania.email;
+        osobaDoDodania.idZalogowanegoUzytkownika = idZalogowanegoUzytkownika;
         if (iloscKontaktow == 0)
         {
             osobaDoDodania.idKontaktu = 1;
@@ -187,6 +196,9 @@ void usunAdresata (vector<DaneKontaktu> &kontakty)
                 if(kontakty[i].idKontaktu == idKontaktuDoUsuniecia)
                 {
                     kontakty.erase(kontakty.begin() + i);
+                    system("cls");
+                    cout<<"Pomyslnie usunieto kontakt";
+                    Sleep(2000);
                 }
             }
         }
@@ -287,47 +299,52 @@ void edytujAdresata (vector<DaneKontaktu> &kontakty)
         zapiszKontaktyPoUsunieciuKontaktu(kontakty);
     }
 }
-vector<DaneKontaktu> wczytajDaneUzytkownika()
+vector<DaneKontaktu> wczytajDaneUzytkownika(int idZalogowanegoUzytkownika)
 {
     fstream ksiazkaAdresowa;
-    ksiazkaAdresowa.open("daneUzytkownika.txt",ios::in);
+    ksiazkaAdresowa.open("Adresaci.txt",ios::in);
     vector<DaneKontaktu> kontakty(0);
     if (ksiazkaAdresowa.good() == true)
     {
         string zaczytanaLinia;
-        string daneAdresata [6];
         while(getline(ksiazkaAdresowa, zaczytanaLinia))
         {
-            int indeksDanej = 0;
-            DaneKontaktu osobaDoPrzypisania;
-            string danaDoPrzypisania = "";
-            int dlugoscZaczytanejLinii = zaczytanaLinia.length();
-            for(int i=0; i<dlugoscZaczytanejLinii; i++)
+            int zaczytaneIdUzytkownika = zaczytanaLinia[2] - 48;
+            if (zaczytaneIdUzytkownika == idZalogowanegoUzytkownika)
             {
-                if(zaczytanaLinia[i] != '|')
+                string daneAdresata [7];
+                int indeksDanej = 0;
+                DaneKontaktu osobaDoPrzypisania;
+                string danaDoPrzypisania = "";
+                int dlugoscZaczytanejLinii = zaczytanaLinia.length();
+                for(int i=0; i<dlugoscZaczytanejLinii; i++)
                 {
-                    danaDoPrzypisania += zaczytanaLinia[i];
+                    if(zaczytanaLinia[i] != '|')
+                    {
+                        danaDoPrzypisania += zaczytanaLinia[i];
+                    }
+                    else if(zaczytanaLinia[i] == '|')
+                    {
+                        daneAdresata[indeksDanej] = danaDoPrzypisania;
+                        danaDoPrzypisania = "";
+                        indeksDanej++;
+                    }
                 }
-                else if(zaczytanaLinia[i] == '|')
-                {
-                    daneAdresata[indeksDanej] = danaDoPrzypisania;
-                    danaDoPrzypisania = "";
-                    indeksDanej++;
-                }
+                osobaDoPrzypisania.idKontaktu = atoi(daneAdresata[0].c_str());
+                osobaDoPrzypisania.idZalogowanegoUzytkownika = atoi(daneAdresata[1].c_str());
+                osobaDoPrzypisania.imie = daneAdresata[2];
+                osobaDoPrzypisania.nazwisko = daneAdresata[3];
+                osobaDoPrzypisania.nrTelefonu = daneAdresata[4];
+                osobaDoPrzypisania.email = daneAdresata[5];
+                osobaDoPrzypisania.adresZamieszkania = daneAdresata[6];
+                kontakty.push_back(osobaDoPrzypisania);
             }
-            osobaDoPrzypisania.idKontaktu = atoi(daneAdresata[0].c_str());
-            osobaDoPrzypisania.imie = daneAdresata[1];
-            osobaDoPrzypisania.nazwisko = daneAdresata[2];
-            osobaDoPrzypisania.nrTelefonu = daneAdresata[3];
-            osobaDoPrzypisania.email = daneAdresata[4];
-            osobaDoPrzypisania.adresZamieszkania = daneAdresata[5];
-            kontakty.push_back(osobaDoPrzypisania);
         }
     }
     ksiazkaAdresowa.close();
     return kontakty;
 }
-void rejestracja(vector<Uzytkownik> &uzytkownicy)////TUTAAAAJJ!!!!!!!!!!!!!!!!
+void rejestracja(vector<Uzytkownik> &uzytkownicy)
 {
     Uzytkownik nowyUzytkownik;
     int iloscUzytkownikow = uzytkownicy.size();
@@ -379,7 +396,7 @@ int logowanie(vector<Uzytkownik> &uzytkownicy)
         {
             for (int proby=0; proby <3; proby++)
             {
-                cout<<"Podaj haslo. Pozostalo prob "<<3-proby<<":";
+                cout<<"Podaj haslo. Pozostalo prob "<<3-proby<<": ";
                 cin>>haslo;
                 if(uzytkownicy[i].haslo == haslo)
                 {
@@ -419,7 +436,7 @@ int uruchomKsiazkeAdresowa(vector <Uzytkownik> &uzytkownicy, int idZalogowanegoU
 {
     bool ksiazkaAdresowaZawieraKontakty = false;
     vector<DaneKontaktu> kontakty(0);
-    kontakty = wczytajDaneUzytkownika();
+    kontakty = wczytajDaneUzytkownika(idZalogowanegoUzytkownika);
     char wyborOpcji;
     while (1)
     {
@@ -440,7 +457,7 @@ int uruchomKsiazkeAdresowa(vector <Uzytkownik> &uzytkownicy, int idZalogowanegoU
         case '1':
         {
             system("cls");
-            dodajKontakt(kontakty);
+            dodajKontakt(kontakty, idZalogowanegoUzytkownika);
         }
         break;
         case '2':
