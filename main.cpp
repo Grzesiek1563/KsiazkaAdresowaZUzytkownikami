@@ -221,6 +221,7 @@ void usunAdresata (vector<DaneKontaktu> &kontakty)
         cout<<"Aby usunac kontakt, wpisz jego ID: ";
         int idKontaktuDoUsuniecia;
         cin>>idKontaktuDoUsuniecia;
+        //TAK SAMO JAK PRZY EDYCJI SPRAWDZ CZY JEST KTOS O TAKIM ID !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
         char potwierdzenieUsuniecia;
         cout<<"Czy jestes pewien ze chcesz usunac ten kontakt(t/n)?";
         potwierdzenieUsuniecia = getch();
@@ -240,6 +241,60 @@ void usunAdresata (vector<DaneKontaktu> &kontakty)
         zapiszKontaktyPoUsunieciuKontaktu(kontakty);
     }
 }
+void zapisDoPlikuPoZedytowaniuKontaktu (int iDEdytowanegoKontaktu, DaneKontaktu zedytowanyKontakt)
+{
+    fstream ksiazkaAdresowa;
+    string zaczytanaLinia, idAdresata;
+    ksiazkaAdresowa.open("Adresaci.txt", ios::in);
+    if (ksiazkaAdresowa.good() == true)
+    {
+        fstream ksiazkaAdresowaTymczasowy;
+        ksiazkaAdresowaTymczasowy.open("Adresaci_tymczasowy.txt", ios::out);
+        if (ksiazkaAdresowaTymczasowy.good() == true)
+        {
+            while(getline(ksiazkaAdresowa,zaczytanaLinia))
+            {
+                idAdresata = "";
+                int indeksZnaku = 0;
+                while (zaczytanaLinia[indeksZnaku]!='|')
+                {
+                    idAdresata+=zaczytanaLinia[indeksZnaku];
+                    indeksZnaku++;
+                }
+                int zaczytaneIdAresata = atoi(idAdresata.c_str());
+                if(iDEdytowanegoKontaktu == zaczytaneIdAresata)
+                {
+                    ksiazkaAdresowaTymczasowy<<zedytowanyKontakt.idKontaktu<<"|";
+                    ksiazkaAdresowaTymczasowy<<zedytowanyKontakt.idZalogowanegoUzytkownika<<"|";
+                    ksiazkaAdresowaTymczasowy<<zedytowanyKontakt.imie<<"|";
+                    ksiazkaAdresowaTymczasowy<<zedytowanyKontakt.nazwisko<<"|";
+                    ksiazkaAdresowaTymczasowy<<zedytowanyKontakt.nrTelefonu<<"|";
+                    ksiazkaAdresowaTymczasowy<<zedytowanyKontakt.email<<"|";
+                    ksiazkaAdresowaTymczasowy<<zedytowanyKontakt.adresZamieszkania<<"|"<<endl;
+                }
+                else
+                {
+                    ksiazkaAdresowaTymczasowy<<zaczytanaLinia<<endl;
+                }
+            }
+        }
+        ksiazkaAdresowaTymczasowy.close();
+    }
+    ksiazkaAdresowa.close();
+    remove("Adresaci.txt");
+    rename("Adresaci_tymczasowy.txt", "Adresaci.txt");
+}
+bool sprawdzCzyJestKontaktOTakimId(vector<DaneKontaktu> kontakty, int idEdytowanegoKontaktu)
+{
+    for (int i=0; i < kontakty.size(); i++)
+    {
+        if(kontakty[i].idKontaktu == idEdytowanegoKontaktu)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 void edytujAdresata (vector<DaneKontaktu> &kontakty)
 {
     bool ksiazkaAdresowaZawieraKontakty = sprawdzCzyKsiazkaAdresowaZawieraKontakty(kontakty);
@@ -250,88 +305,88 @@ void edytujAdresata (vector<DaneKontaktu> &kontakty)
         int idEdytowanegoKontaktu;
         cout<<"Podaj ID kontaktu dla ktorego chcesz wprowadzic zmiany: ";
         cin>>idEdytowanegoKontaktu;
-        system("cls");
-        cout<<"1 - imie"<<endl<<"2 - nazwisko"<<endl<<"3 - numer telefonu"<<endl;
-        cout<<"4 - email"<<endl<<"5 - adres"<<endl<<"6 - powrot do menu"<<endl;
-        char znakWyboru;
-        znakWyboru = getch();
-        system("cls");
-        switch(znakWyboru)
+        bool wKsiazceJestKontaktOTakimId = sprawdzCzyJestKontaktOTakimId(kontakty, idEdytowanegoKontaktu);
+        if(wKsiazceJestKontaktOTakimId)
         {
-        case '1':
-        {
-            string noweImie;
-            cout<<"Podaj nowe imie: ";
-            cin>>noweImie;
-            for(int i = 0; i < kontakty.size(); i++)
+            DaneKontaktu zedytowanyKontakt;
+            int indeksEdytowanegoKontaktu = 0;
+            for (int i=0; i < kontakty.size(); i++)
             {
                 if(kontakty[i].idKontaktu == idEdytowanegoKontaktu)
-                    kontakty[i].imie = noweImie;
+                {
+                    indeksEdytowanegoKontaktu = i;
+                }
             }
-        }
-        break;
-        case '2':
-        {
-            string noweNazwisko;
-            cout<<"Podaj nowe nazwisko: ";
-            cin>>noweNazwisko;
-            for(int i = 0; i < kontakty.size(); i++)
+            system("cls");
+            cout<<"1 - imie"<<endl<<"2 - nazwisko"<<endl<<"3 - numer telefonu"<<endl;
+            cout<<"4 - email"<<endl<<"5 - adres"<<endl<<"6 - powrot do menu"<<endl;
+            cout<<"Twoj wybor: ";
+            char znakWyboru;
+            znakWyboru = getch();
+            system("cls");
+            switch(znakWyboru)
             {
-                if(kontakty[i].idKontaktu == idEdytowanegoKontaktu)
-                    kontakty[i].nazwisko = noweNazwisko;
-            }
-        }
-        break;
-        case '3':
-        {
-            string nowyNrTelefonu;
-            cout<<"Podaj nowy numer telefonu: ";
-            cin.sync();
-            getline(cin, nowyNrTelefonu);
-            for(int i = 0; i < kontakty.size(); i++)
+            case '1':
             {
-                if(kontakty[i].idKontaktu == idEdytowanegoKontaktu)
-                    kontakty[i].nrTelefonu = nowyNrTelefonu;
+                string noweImie;
+                cout<<"Podaj nowe imie: ";
+                cin>>noweImie;
+                kontakty[indeksEdytowanegoKontaktu].imie = noweImie;
             }
-        }
-        break;
-        case '4':
-        {
-            string nowyEmail;
-            cout<<"Podaj nowy email: ";
-            cin>>nowyEmail;
-            for(int i = 0; i < kontakty.size(); i++)
+            break;
+            case '2':
             {
-                if(kontakty[i].idKontaktu == idEdytowanegoKontaktu)
-                    kontakty[i].email = nowyEmail;
+                string noweNazwisko;
+                cout<<"Podaj nowe nazwisko: ";
+                cin>>noweNazwisko;
+                kontakty[indeksEdytowanegoKontaktu].nazwisko = noweNazwisko;
             }
-        }
-        break;
-        case '5':
-        {
-            string nowyAdres;
-            cout<<"Podaj nowy adres: ";
-            cin.sync();
-            getline(cin, nowyAdres);
-            for(int i = 0; i < kontakty.size(); i++)
+            break;
+            case '3':
             {
-                if(kontakty[i].idKontaktu == idEdytowanegoKontaktu)
-                    kontakty[i].adresZamieszkania = nowyAdres;
+                string nowyNrTelefonu;
+                cout<<"Podaj nowy numer telefonu: ";
+                cin.sync();
+                getline(cin, nowyNrTelefonu);
+                kontakty[indeksEdytowanegoKontaktu].nrTelefonu = nowyNrTelefonu;
             }
+            break;
+            case '4':
+            {
+                string nowyEmail;
+                cout<<"Podaj nowy email: ";
+                cin>>nowyEmail;
+                kontakty[indeksEdytowanegoKontaktu].email = nowyEmail;
+            }
+            break;
+            case '5':
+            {
+                string nowyAdres;
+                cout<<"Podaj nowy adres: ";
+                cin.sync();
+                getline(cin, nowyAdres);
+                kontakty[indeksEdytowanegoKontaktu].adresZamieszkania = nowyAdres;
+            }
+            break;
+            case '6':
+            {
+                ;
+            }
+            break;
+            default:
+            {
+                cout<<"Wybrales nieprawidlowy numer."<<endl;
+                Sleep(1500);
+            }
+            }
+            zedytowanyKontakt = kontakty[indeksEdytowanegoKontaktu];
+            zapisDoPlikuPoZedytowaniuKontaktu(idEdytowanegoKontaktu, zedytowanyKontakt);
         }
-        break;
-        case '6':
+        else
         {
-            ;
-        }
-        break;
-        default:
-        {
-            cout<<"Wybrales nieprawidlowy numer."<<endl;
+            cout<<"W Twojej ksiazce nie ma osoby o takim ID"<<endl;
             Sleep(1500);
         }
-        }
-        zapiszKontaktyPoUsunieciuKontaktu(kontakty);
     }
 }
 vector<DaneKontaktu> wczytajAdresatow(int idZalogowanegoUzytkownika)
