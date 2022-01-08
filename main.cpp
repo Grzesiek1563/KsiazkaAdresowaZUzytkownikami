@@ -344,6 +344,18 @@ vector<DaneKontaktu> wczytajDaneUzytkownika(int idZalogowanegoUzytkownika)
     ksiazkaAdresowa.close();
     return kontakty;
 }
+void zapiszUzytkownika(Uzytkownik nowyUzytkownik)
+{
+    fstream daneUzytkownika;
+    daneUzytkownika.open("Uzytkownicy.txt",ios::out|ios::app);
+    if(daneUzytkownika.good())
+    {
+    daneUzytkownika<<nowyUzytkownik.idUzytkownika<<"|";
+    daneUzytkownika<<nowyUzytkownik.login<<"|";
+    daneUzytkownika<<nowyUzytkownik.haslo<<endl;
+    }
+    daneUzytkownika.close();
+}
 void rejestracja(vector<Uzytkownik> &uzytkownicy)
 {
     Uzytkownik nowyUzytkownik;
@@ -371,6 +383,7 @@ void rejestracja(vector<Uzytkownik> &uzytkownicy)
     nowyUzytkownik.haslo = haslo;
     nowyUzytkownik.idUzytkownika = iloscUzytkownikow + 1;
     uzytkownicy.push_back(nowyUzytkownik);
+    zapiszUzytkownika(nowyUzytkownik);
     cout<<"Konto zalozone"<<endl;
     Sleep(1000);
 }
