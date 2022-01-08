@@ -299,7 +299,7 @@ void edytujAdresata (vector<DaneKontaktu> &kontakty)
         zapiszKontaktyPoUsunieciuKontaktu(kontakty);
     }
 }
-vector<DaneKontaktu> wczytajDaneUzytkownika(int idZalogowanegoUzytkownika)
+vector<DaneKontaktu> wczytajAdresatow(int idZalogowanegoUzytkownika)
 {
     fstream ksiazkaAdresowa;
     ksiazkaAdresowa.open("Adresaci.txt",ios::in);
@@ -309,9 +309,6 @@ vector<DaneKontaktu> wczytajDaneUzytkownika(int idZalogowanegoUzytkownika)
         string zaczytanaLinia;
         while(getline(ksiazkaAdresowa, zaczytanaLinia))
         {
-            int zaczytaneIdUzytkownika = zaczytanaLinia[2] - 48;
-            if (zaczytaneIdUzytkownika == idZalogowanegoUzytkownika)
-            {
                 string daneAdresata [7];
                 int indeksDanej = 0;
                 DaneKontaktu osobaDoPrzypisania;
@@ -330,6 +327,9 @@ vector<DaneKontaktu> wczytajDaneUzytkownika(int idZalogowanegoUzytkownika)
                         indeksDanej++;
                     }
                 }
+                //int zaczytaneIdUzytkownika = atoi(daneAdresata[1].c_str());
+                //if (zaczytaneIdUzytkownika == idZalogowanegoUzytkownika)
+                //{
                 osobaDoPrzypisania.idKontaktu = atoi(daneAdresata[0].c_str());
                 osobaDoPrzypisania.idZalogowanegoUzytkownika = atoi(daneAdresata[1].c_str());
                 osobaDoPrzypisania.imie = daneAdresata[2];
@@ -338,11 +338,50 @@ vector<DaneKontaktu> wczytajDaneUzytkownika(int idZalogowanegoUzytkownika)
                 osobaDoPrzypisania.email = daneAdresata[5];
                 osobaDoPrzypisania.adresZamieszkania = daneAdresata[6];
                 kontakty.push_back(osobaDoPrzypisania);
-            }
+                //}
         }
     }
     ksiazkaAdresowa.close();
     return kontakty;
+}
+vector<Uzytkownik> wczytajUzytkownikow()
+{
+    fstream daneUzytkownika;
+    daneUzytkownika.open("Uzytkownicy.txt",ios::in);
+    vector<Uzytkownik> uzytkownicy(0);
+    if (daneUzytkownika.good() == true)
+    {
+        string zaczytanaLinia;
+        while(getline(daneUzytkownika, zaczytanaLinia))
+        {
+                string daneDoPrzypisania [3];
+                int indeksDanej = 0;
+                Uzytkownik uzytkownikDoPrzypisania;
+                string danaDoPrzypisania = "";
+                int dlugoscZaczytanejLinii = zaczytanaLinia.length();
+                int indeksOstatniegoZnakuZaczytanejLinii = dlugoscZaczytanejLinii - 1;
+                for(int i = 0; i<dlugoscZaczytanejLinii; i++)
+                {
+                    if(zaczytanaLinia[i] != '|')
+                    {
+                        danaDoPrzypisania += zaczytanaLinia[i];
+                    }
+                    else if(zaczytanaLinia[i] == '|')
+                    {
+                        daneDoPrzypisania[indeksDanej] = danaDoPrzypisania;
+                        danaDoPrzypisania = "";
+                        indeksDanej++;
+                    }
+                }
+                uzytkownikDoPrzypisania.idUzytkownika = atoi(daneDoPrzypisania[0].c_str());
+                uzytkownikDoPrzypisania.login = daneDoPrzypisania[1];
+                uzytkownikDoPrzypisania.haslo = daneDoPrzypisania[2];
+                uzytkownicy.push_back(uzytkownikDoPrzypisania);
+
+        }
+    }
+    daneUzytkownika.close();
+    return uzytkownicy;
 }
 void zapiszUzytkownika(Uzytkownik nowyUzytkownik)
 {
@@ -352,7 +391,7 @@ void zapiszUzytkownika(Uzytkownik nowyUzytkownik)
     {
     daneUzytkownika<<nowyUzytkownik.idUzytkownika<<"|";
     daneUzytkownika<<nowyUzytkownik.login<<"|";
-    daneUzytkownika<<nowyUzytkownik.haslo<<endl;
+    daneUzytkownika<<nowyUzytkownik.haslo<<"|"<<endl;
     }
     daneUzytkownika.close();
 }
@@ -388,7 +427,7 @@ void rejestracja(vector<Uzytkownik> &uzytkownicy)
     Sleep(1000);
 }
 
-int logowanie(vector<Uzytkownik> &uzytkownicy)
+int logowanie(vector<Uzytkownik> uzytkownicy)
 {
     int iloscUzytkownikow = uzytkownicy.size();
     if (iloscUzytkownikow == 0)
@@ -449,7 +488,7 @@ int uruchomKsiazkeAdresowa(vector <Uzytkownik> &uzytkownicy, int idZalogowanegoU
 {
     bool ksiazkaAdresowaZawieraKontakty = false;
     vector<DaneKontaktu> kontakty(0);
-    kontakty = wczytajDaneUzytkownika(idZalogowanegoUzytkownika);
+    kontakty = wczytajAdresatow(idZalogowanegoUzytkownika);
     char wyborOpcji;
     while (1)
     {
@@ -548,6 +587,7 @@ int uruchomKsiazkeAdresowa(vector <Uzytkownik> &uzytkownicy, int idZalogowanegoU
 int main()
 {
     vector<Uzytkownik> uzytkownicy(0);
+    uzytkownicy = wczytajUzytkownikow();
     int idZalogowanegoUzytkownika = 0;
     char wybor;
     while (1)
