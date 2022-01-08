@@ -87,6 +87,48 @@ void zapiszKontakt(DaneKontaktu osobaDoDodania)
     }
     ksiazkaAdresowa.close();
 }
+int wyznaczIdNowegoAdresata ()
+{
+    fstream ksiazkaAdresowa;
+    string zaczytanaLinia;
+    string idOstatniegoAdresata = "";
+    int idNowegoAdresata = 1;
+    int iloscLiniiPliku = 0;
+    int licznikLiniiPliku = 1;
+    ksiazkaAdresowa.open("Adresaci.txt", ios::in);
+    if (ksiazkaAdresowa.good() == true)
+    {
+    while(getline(ksiazkaAdresowa, zaczytanaLinia))
+    {
+        iloscLiniiPliku++;
+    }
+    }
+    ksiazkaAdresowa.close();
+    ksiazkaAdresowa.open("Adresaci.txt", ios::in);
+    if (ksiazkaAdresowa.good() == true)
+    {
+        while(getline(ksiazkaAdresowa, zaczytanaLinia))
+        {
+            if(licznikLiniiPliku == iloscLiniiPliku)
+            {
+                int indeksZnaku = 0;
+                while (zaczytanaLinia[indeksZnaku]!='|')
+                {
+                    idOstatniegoAdresata+=zaczytanaLinia[indeksZnaku];
+                    indeksZnaku++;
+                }
+            }
+            else
+            {
+                licznikLiniiPliku++;
+            }
+        }
+        idNowegoAdresata = atoi(idOstatniegoAdresata.c_str()) + 1;
+        return idNowegoAdresata;
+    }
+    ksiazkaAdresowa.close();
+    return idNowegoAdresata;
+}
 
 void dodajKontakt (vector<DaneKontaktu> &kontakty, int idZalogowanegoUzytkownika)
 {
@@ -112,14 +154,7 @@ void dodajKontakt (vector<DaneKontaktu> &kontakty, int idZalogowanegoUzytkownika
         cout<<"Podaj email: ";
         cin>>osobaDoDodania.email;
         osobaDoDodania.idZalogowanegoUzytkownika = idZalogowanegoUzytkownika;
-        if (iloscKontaktow == 0)
-        {
-            osobaDoDodania.idKontaktu = 1;
-        }
-        else
-        {
-            osobaDoDodania.idKontaktu = kontakty[iloscKontaktow - 1].idKontaktu + 1;
-        }
+        osobaDoDodania.idKontaktu = wyznaczIdNowegoAdresata();
         kontakty.push_back(osobaDoDodania);
         zapiszKontakt(osobaDoDodania);
     }
@@ -327,9 +362,9 @@ vector<DaneKontaktu> wczytajAdresatow(int idZalogowanegoUzytkownika)
                         indeksDanej++;
                     }
                 }
-                //int zaczytaneIdUzytkownika = atoi(daneAdresata[1].c_str());
-                //if (zaczytaneIdUzytkownika == idZalogowanegoUzytkownika)
-                //{
+                int zaczytaneIdUzytkownika = atoi(daneAdresata[1].c_str());
+                if (zaczytaneIdUzytkownika == idZalogowanegoUzytkownika)
+                {
                 osobaDoPrzypisania.idKontaktu = atoi(daneAdresata[0].c_str());
                 osobaDoPrzypisania.idZalogowanegoUzytkownika = atoi(daneAdresata[1].c_str());
                 osobaDoPrzypisania.imie = daneAdresata[2];
@@ -338,7 +373,7 @@ vector<DaneKontaktu> wczytajAdresatow(int idZalogowanegoUzytkownika)
                 osobaDoPrzypisania.email = daneAdresata[5];
                 osobaDoPrzypisania.adresZamieszkania = daneAdresata[6];
                 kontakty.push_back(osobaDoPrzypisania);
-                //}
+                }
         }
     }
     ksiazkaAdresowa.close();
