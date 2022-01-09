@@ -15,7 +15,6 @@ struct Uzytkownik
     int idUzytkownika;
     string login, haslo;
 };
-///////// KSIAZKA ADRESOWA BEGIN
 bool sprawdzCzyKsiazkaAdresowaZawieraKontakty (vector<DaneKontaktu> &kontakty)
 {
     if (kontakty.size() == 0)
@@ -50,26 +49,6 @@ bool sprawdzCzyIstniejeJuzTakiKontakt (string imie, string nazwisko, vector<Dane
         }
     }
     return true;
-}
-void zapiszKontaktyPoUsunieciuKontaktu(vector<DaneKontaktu> &kontakty)
-{
-    int iloscKontaktow = kontakty.size();
-    fstream ksiazkaAdresowa;
-    ksiazkaAdresowa.open("Adresaci.txt",ios::out);
-    if(ksiazkaAdresowa.good())
-    {
-        for(int i = 0; i < iloscKontaktow; i++)
-        {
-            ksiazkaAdresowa<<kontakty[i].idKontaktu<<"|";
-            ksiazkaAdresowa<<kontakty[i].idZalogowanegoUzytkownika<<"|";
-            ksiazkaAdresowa<<kontakty[i].imie<<"|";
-            ksiazkaAdresowa<<kontakty[i].nazwisko<<"|";
-            ksiazkaAdresowa<<kontakty[i].nrTelefonu<<"|";
-            ksiazkaAdresowa<<kontakty[i].email<<"|";
-            ksiazkaAdresowa<<kontakty[i].adresZamieszkania<<"|"<<endl;
-        }
-    }
-    ksiazkaAdresowa.close();
 }
 void zapiszKontakt(DaneKontaktu osobaDoDodania)
 {
@@ -211,6 +190,54 @@ void wyswietlWszystkieKontakty(vector<DaneKontaktu> &kontakty)
         cout<<"Adres zamieszkania: "<<kontakty[i].adresZamieszkania<<endl;
     }
 }
+void zapisDoPlikuPoUsunieciuKontaktu (int idUsuwanegoKontaktu)
+{
+    fstream ksiazkaAdresowa;
+    string zaczytanaLinia, idAdresata;
+    ksiazkaAdresowa.open("Adresaci.txt", ios::in);
+    if (ksiazkaAdresowa.good() == true)
+    {
+        fstream ksiazkaAdresowaTymczasowy;
+        ksiazkaAdresowaTymczasowy.open("Adresaci_tymczasowy.txt", ios::out);
+        if (ksiazkaAdresowaTymczasowy.good() == true)
+        {
+            while(getline(ksiazkaAdresowa,zaczytanaLinia))
+            {
+                idAdresata = "";
+                int indeksZnaku = 0;
+                while (zaczytanaLinia[indeksZnaku]!='|')
+                {
+                    idAdresata+=zaczytanaLinia[indeksZnaku];
+                    indeksZnaku++;
+                }
+                int zaczytaneIdAresata = atoi(idAdresata.c_str());
+                if(idUsuwanegoKontaktu == zaczytaneIdAresata)
+                {
+                    ;
+                }
+                else
+                {
+                    ksiazkaAdresowaTymczasowy<<zaczytanaLinia<<endl;
+                }
+            }
+        }
+        ksiazkaAdresowaTymczasowy.close();
+    }
+    ksiazkaAdresowa.close();
+    remove("Adresaci.txt");
+    rename("Adresaci_tymczasowy.txt", "Adresaci.txt");
+}
+bool sprawdzCzyJestKontaktOTakimId(vector<DaneKontaktu> kontakty, int idSprawdzanegoKontaktu)
+{
+    for (int i=0; i < kontakty.size(); i++)
+    {
+        if(kontakty[i].idKontaktu == idSprawdzanegoKontaktu)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 void usunAdresata (vector<DaneKontaktu> &kontakty)
 {
     bool ksiazkaAdresowaZawieraKontakty = sprawdzCzyKsiazkaAdresowaZawieraKontakty(kontakty);
@@ -221,7 +248,9 @@ void usunAdresata (vector<DaneKontaktu> &kontakty)
         cout<<"Aby usunac kontakt, wpisz jego ID: ";
         int idKontaktuDoUsuniecia;
         cin>>idKontaktuDoUsuniecia;
-        //TAK SAMO JAK PRZY EDYCJI SPRAWDZ CZY JEST KTOS O TAKIM ID !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+        bool wKsiazceJestKontaktOTakimId = sprawdzCzyJestKontaktOTakimId(kontakty, idKontaktuDoUsuniecia);
+        if(wKsiazceJestKontaktOTakimId)
+        {
         char potwierdzenieUsuniecia;
         cout<<"Czy jestes pewien ze chcesz usunac ten kontakt(t/n)?";
         potwierdzenieUsuniecia = getch();
@@ -237,8 +266,14 @@ void usunAdresata (vector<DaneKontaktu> &kontakty)
                     Sleep(2000);
                 }
             }
+            zapisDoPlikuPoUsunieciuKontaktu(idKontaktuDoUsuniecia);
         }
-        zapiszKontaktyPoUsunieciuKontaktu(kontakty);
+        }
+        else
+        {
+            cout<<"W Twojej ksiazce nie ma osoby o takim ID"<<endl;
+            Sleep(1500);
+        }
     }
 }
 void zapisDoPlikuPoZedytowaniuKontaktu (int iDEdytowanegoKontaktu, DaneKontaktu zedytowanyKontakt)
@@ -283,17 +318,6 @@ void zapisDoPlikuPoZedytowaniuKontaktu (int iDEdytowanegoKontaktu, DaneKontaktu 
     ksiazkaAdresowa.close();
     remove("Adresaci.txt");
     rename("Adresaci_tymczasowy.txt", "Adresaci.txt");
-}
-bool sprawdzCzyJestKontaktOTakimId(vector<DaneKontaktu> kontakty, int idEdytowanegoKontaktu)
-{
-    for (int i=0; i < kontakty.size(); i++)
-    {
-        if(kontakty[i].idKontaktu == idEdytowanegoKontaktu)
-        {
-            return true;
-        }
-    }
-    return false;
 }
 void edytujAdresata (vector<DaneKontaktu> &kontakty)
 {
@@ -558,6 +582,21 @@ int logowanie(vector<Uzytkownik> uzytkownicy)
     return 0;
     }
 }
+void zapiszUzytkownikowPoZmianieHasla (vector<Uzytkownik> uzytkownicy)
+{
+    fstream daneUzytkownika;
+    daneUzytkownika.open("Uzytkownicy.txt",ios::out);
+    if(daneUzytkownika.good())
+    {
+        for (int i=0; i<uzytkownicy.size(); i++)
+        {
+        daneUzytkownika<<uzytkownicy[i].idUzytkownika<<"|";
+        daneUzytkownika<<uzytkownicy[i].login<<"|";
+        daneUzytkownika<<uzytkownicy[i].haslo<<"|"<<endl;
+        }
+    }
+    daneUzytkownika.close();
+}
 void zmianaHasla (vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika)
 {
     int iloscUzytkownikow = uzytkownicy.size();
@@ -573,6 +612,7 @@ void zmianaHasla (vector<Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika
             Sleep(1500);
         }
     }
+    zapiszUzytkownikowPoZmianieHasla(uzytkownicy);
 }
 int uruchomKsiazkeAdresowa(vector <Uzytkownik> &uzytkownicy, int idZalogowanegoUzytkownika)
 {
