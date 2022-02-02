@@ -4,14 +4,11 @@
 #include <fstream>
 #include <cstdlib>
 #include <vector>
+#include "uzytkownicy.h"
 using namespace std;
 struct DaneKontaktu {
     int idKontaktu, idZalogowanegoUzytkownika;
     string imie, nazwisko, nrTelefonu, adresZamieszkania, email;
-};
-struct Uzytkownik {
-    int idUzytkownika;
-    string login, haslo;
 };
 bool sprawdzCzyKsiazkaAdresowaZawieraKontakty (vector<DaneKontaktu> &kontakty) {
     if (kontakty.size() == 0) {
@@ -377,108 +374,6 @@ vector<DaneKontaktu> wczytajAdresatow(int idZalogowanegoUzytkownika) {
     ksiazkaAdresowa.close();
     return kontakty;
 }
-vector<Uzytkownik> wczytajUzytkownikow() {
-    fstream daneUzytkownika;
-    daneUzytkownika.open("Uzytkownicy.txt",ios::in);
-    vector<Uzytkownik> uzytkownicy(0);
-    if (daneUzytkownika.good() == true) {
-        string zaczytanaLinia;
-        while(getline(daneUzytkownika, zaczytanaLinia)) {
-            string daneDoPrzypisania [3];
-            int indeksDanej = 0;
-            Uzytkownik uzytkownikDoPrzypisania;
-            string danaDoPrzypisania = "";
-            int dlugoscZaczytanejLinii = zaczytanaLinia.length();
-            int indeksOstatniegoZnakuZaczytanejLinii = dlugoscZaczytanejLinii - 1;
-            for(int i = 0; i < dlugoscZaczytanejLinii; i++) {
-                if(zaczytanaLinia[i] != '|') {
-                    danaDoPrzypisania += zaczytanaLinia[i];
-                } else if(zaczytanaLinia[i] == '|') {
-                    daneDoPrzypisania[indeksDanej] = danaDoPrzypisania;
-                    danaDoPrzypisania = "";
-                    indeksDanej++;
-                }
-            }
-            uzytkownikDoPrzypisania.idUzytkownika = atoi(daneDoPrzypisania[0].c_str());
-            uzytkownikDoPrzypisania.login = daneDoPrzypisania[1];
-            uzytkownikDoPrzypisania.haslo = daneDoPrzypisania[2];
-            uzytkownicy.push_back(uzytkownikDoPrzypisania);
-
-        }
-    }
-    daneUzytkownika.close();
-    return uzytkownicy;
-}
-void zapiszUzytkownika(Uzytkownik nowyUzytkownik) {
-    fstream daneUzytkownika;
-    daneUzytkownika.open("Uzytkownicy.txt",ios::out|ios::app);
-    if(daneUzytkownika.good()) {
-        daneUzytkownika << nowyUzytkownik.idUzytkownika << "|";
-        daneUzytkownika << nowyUzytkownik.login << "|";
-        daneUzytkownika << nowyUzytkownik.haslo << "|" << endl;
-    }
-    daneUzytkownika.close();
-}
-void rejestracja(vector<Uzytkownik> &uzytkownicy) {
-    Uzytkownik nowyUzytkownik;
-    int iloscUzytkownikow = uzytkownicy.size();
-    string login, haslo;
-    cout << "Podaj nazwe uzytkownika: ";
-    cin >> login;
-    int i = 0;
-    while(i < iloscUzytkownikow) {
-        if (uzytkownicy[i].login == login) {
-            cout << "Taki uzytkownik juz istnieje. Wpisz inna nazwe uzytkownika: ";
-            cin >> login;
-            i = 0;
-        } else {
-            i++;
-        }
-    }
-    cout << "Podaj haslo: ";
-    cin >> haslo;
-    nowyUzytkownik.login = login;
-    nowyUzytkownik.haslo = haslo;
-    nowyUzytkownik.idUzytkownika = iloscUzytkownikow + 1;
-    uzytkownicy.push_back(nowyUzytkownik);
-    zapiszUzytkownika(nowyUzytkownik);
-    cout << "Konto zalozone" << endl;
-    Sleep(1000);
-}
-
-int logowanie(vector<Uzytkownik> uzytkownicy) {
-    int iloscUzytkownikow = uzytkownicy.size();
-    if (iloscUzytkownikow == 0) {
-        cout << "Brak zarejestrowanych uzytkownikow. " << endl;
-        Sleep(1500);
-        return 0;
-    } else {
-        string login, haslo;
-        cout << "Podaj login: ";
-        cin >> login;
-        int i = 0;
-        while(i < iloscUzytkownikow) {
-            if (uzytkownicy[i].login == login) {
-                for (int proby = 0; proby < 3; proby++) {
-                    cout << "Podaj haslo. Pozostalo prob " << 3-proby << ": ";
-                    cin >> haslo;
-                    if(uzytkownicy[i].haslo == haslo) {
-                        cout << "Zalogowales sie. " << endl;
-                        Sleep(1000);
-                        return uzytkownicy[i].idUzytkownika;
-                    }
-                }
-                cout << "Podales 3 razy bledne haslo. Poczekaj 3 sekundy przed kolejna proba" << endl;
-                Sleep(3000);
-                return 0;
-            }
-            i++;
-        }
-        cout << "Nie ma uzytkownika z takim loginem" << endl;
-        Sleep(1000);
-        return 0;
-    }
-}
 void zapiszUzytkownikowPoZmianieHasla (vector<Uzytkownik> uzytkownicy) {
     fstream daneUzytkownika;
     daneUzytkownika.open("Uzytkownicy.txt",ios::out);
@@ -590,7 +485,7 @@ int uruchomKsiazkeAdresowa(vector <Uzytkownik> &uzytkownicy, int idZalogowanegoU
 
 int main() {
     vector<Uzytkownik> uzytkownicy(0);
-    uzytkownicy = wczytajUzytkownikow();
+    uzytkownicy[0].wczytajUzytkownikow(uzytkownicy);
     int idZalogowanegoUzytkownika = 0;
     char wybor;
     while (1) {
@@ -604,12 +499,12 @@ int main() {
             switch (wybor) {
             case '1': {
                 system("cls");
-                rejestracja(uzytkownicy);
+                uzytkownicy[0].rejestracja(uzytkownicy);
             }
             break;
             case '2': {
                 system("cls");
-                idZalogowanegoUzytkownika = logowanie(uzytkownicy);
+                idZalogowanegoUzytkownika = uzytkownicy[0].logowanie(uzytkownicy);
             }
             break;
             case '9': {
